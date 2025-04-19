@@ -8,21 +8,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var syncCmd = &cobra.Command{
-	Use:   "sync",
-	Short: "Synchronizes files from the system into the Git repository",
+var applyCmd = &cobra.Command{
+	Use:   "apply",
+	Short: "Applies tracked files from the repository into the system",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg, err := config.LoadConfig(configPath)
 		if err != nil {
 			log.Fatalf("failed to load config: %v", err)
 		}
 
-		if err := gitops.SyncWithPaths(cfg.RepoURL, cfg.RepoPath, cfg.TrackedPaths); err != nil {
+		if err := gitops.ApplyToSystem(cfg.RepoURL, cfg.RepoPath, cfg.TrackedPaths); err != nil {
 			log.Fatal(err)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(syncCmd)
+	rootCmd.AddCommand(applyCmd)
 }

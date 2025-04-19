@@ -1,0 +1,3 @@
+repo_url: git@github.com:gBarczyszyn/mitosis-gitops.git
+tracked_paths:
+  - ~/.zshrc
