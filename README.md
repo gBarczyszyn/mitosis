@@ -15,16 +15,18 @@
 
 ## 🛠 Installation
 
+### 🔹 Recommended one-liner:
+
 ```bash
-curl -sL https://raw.githubusercontent.com/gBarczyszyn/mitosis/main/install.sh | bash
+REPO_URL=git@github.com:youruser/mitosis-gitops.git \
+  bash <(curl -sL https://raw.githubusercontent.com/gBarczyszyn/mitosis/main/install.sh)
 ```
 
-If `REPO_URL` is not set, the script will prompt you to enter it interactively.
-
-Example:
+### 🔹 Interactive mode:
 
 ```bash
-REPO_URL=git@github.com:gBarczyszyn/mitosis-gitops.git bash install.sh
+curl -sL https://raw.githubusercontent.com/gBarczyszyn/mitosis/main/install.sh -o install.sh
+bash install.sh
 ```
 
 This will:
