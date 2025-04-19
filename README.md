@@ -18,7 +18,7 @@
 ### 1. One-line install (requires Go):
 
 ```bash
-curl -sL https://raw.githubusercontent.com/gBarczyszyn/mitosis/main/install-with-service.sh | bash
+curl -sL https://raw.githubusercontent.com/gBarczyszyn/mitosis/main/install.sh | bash
 ```
 
 This will:
