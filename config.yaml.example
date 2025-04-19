@@ -1,0 +1,46 @@
+# ~/.mitosis/config.yaml
+
+# 🔗 Remote Git repository to sync into
+repo_url: git@github.com:gBarczyszyn/mitosis-gitops.git
+
+# 🧬 Core dotfiles to track (always respected)
+tracked_paths:
+  - ~/.zshrc
+  - ~/.p10k.zsh
+  - ~/.aliases
+  - ~/.gitconfig
+  - ~/.vimrc
+  - ~/.bash_profile
+
+# ☁️ AWS configuration
+aws:
+  enabled: true
+  include_credentials: false  # only set to true if repo is private and secure
+
+# 🔐 SSH keys and config
+ssh:
+  enabled: true
+  keys:
+    - id_rsa.pub
+    - config
+
+# 🧪 GitHub CLI settings
+gh:
+  enabled: true
+  include_hosts: true
+
+# 📝 Neovim
+nvim:
+  enabled: true
+  config_path: ~/.config/nvim
+
+# 💻 VSCode user settings
+vscode:
+  enabled: true
+  settings: true
+  keybindings: true
+
+# 📁 Extra custom files to track
+custom:
+  - ~/.local/bin/my-script
+  - ~/scripts/cleanup.sh

@@ -9,59 +9,71 @@
 - ✅ Syncs system config files to a Git repo (e.g. `.zshrc`, `.gitconfig`, `~/.config/...`)
 - ✅ Applies tracked files from Git into the system
 - ✅ Watches for changes and auto-commits/pushes
-- ✅ Simple YAML configuration
+- ✅ Simple YAML configuration stored in the repository
 - ✅ Clean Code, no bloat, 100% Go
-- ✅ Runs as a background systemd user service
+- ✅ Runs as a background systemd or launchctl service
 
 ## 🛠 Installation
-
-### 1. One-line install (requires Go):
 
 ```bash
 curl -sL https://raw.githubusercontent.com/gBarczyszyn/mitosis/main/install.sh | bash
 ```
 
+If `REPO_URL` is not set, the script will prompt you to enter it interactively.
+
+Example:
+
+```bash
+REPO_URL=git@github.com:gBarczyszyn/mitosis-gitops.git bash install.sh
+```
+
 This will:
-- Clone the repository
-- Build the binary
-- Install it to `/usr/local/bin`
-- Set up `mitosis` as a systemd user service
+- Clone the mitosis CLI
+- Build and install the binary
+- Run `mitosis init --repo <your-repo>`
+- Start the daemon on macOS (`launchctl`) or Linux (`systemd`)
 
-### 2. Create your `~/.mitosis/config.yaml`
+## 🧬 Usage
 
-```yaml
-repo_url: git@github.com:gBarczyszyn/mitosis-dotfiles.git
-tracked_paths:
-  - ~/.zshrc
-  - ~/.p10k.zsh
-  - ~/.gitconfig
-  - ~/.config/nvim/init.vim
+After installing, everything is driven by your Git-based `config.yaml` stored inside the repository itself:
+
+```
+~/.mitosis/<repo-name>/config.yaml
 ```
 
-### 3. Sync manually (optional)
+You can run:
 
 ```bash
-mitosis sync --config ~/.mitosis/config.yaml
+mitosis sync
+mitosis apply
+mitosis daemon
+mitosis doctor
 ```
 
-### 4. Apply from repo (optional)
+## 🛠 Development
+
+To run locally:
 
 ```bash
-mitosis apply --config ~/.mitosis/config.yaml
+make build
+make sync
 ```
 
-### 5. Run manually as daemon (optional)
+To initialize a new repository:
 
 ```bash
-mitosis daemon --config ~/.mitosis/config.yaml
+make init REPO=git@github.com:gBarczyszyn/mitosis-gitops.git
 ```
 
 ## 📦 Directory structure
 
-By default, the repo is cloned into:
-
 ```
-~/.mitosis/<repo-name>/
+~/.mitosis/
+└── mitosis-gitops/
+    ├── config.yaml
+    ├── .zshrc
+    ├── .gitconfig
+    ├── ...
 ```
 
 ## 🧑‍💻 License

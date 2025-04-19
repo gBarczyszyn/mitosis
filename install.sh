@@ -2,27 +2,31 @@
 
 set -e
 
-REPO="https://github.com/gBarczyszyn/mitosis.git"
-INSTALL_DIR="/usr/local/bin"
-BIN_NAME="mitosis"
-MITOSIS_DIR="$HOME/.mitosis"
-CONFIG_PATH="$MITOSIS_DIR/config.yaml"
+if [ -z "$REPO_URL" ]; then
+  read -p "🌐 Enter your Git repository URL (e.g. git@github.com:user/mitosis-gitops.git): " REPO_URL
+fi
 
-echo "📥 Cloning mitosis..."
-git clone $REPO /tmp/mitosis-install
+REPO_NAME=$(basename "$REPO_URL" .git)
+INSTALL_DIR="/usr/local/bin"
+BINARY_NAME="mitosis"
+
+echo "📥 Cloning mitosis source..."
+git clone https://github.com/gBarczyszyn/mitosis.git /tmp/mitosis-install
 cd /tmp/mitosis-install
 
-echo "🔨 Building mitosis binary..."
-go build -o $BIN_NAME
+echo "🔨 Building $BINARY_NAME..."
+go build -o $BINARY_NAME
 
 echo "🚀 Installing to $INSTALL_DIR..."
-sudo mv $BIN_NAME $INSTALL_DIR/
+sudo mv $BINARY_NAME $INSTALL_DIR/
+
+echo "📁 Running mitosis init..."
+$INSTALL_DIR/mitosis init --repo "$REPO_URL"
 
 OS=$(uname -s)
 
 if [[ "$OS" == "Darwin" ]]; then
-  echo "🍎 Detected macOS - setting up launchctl service..."
-
+  echo "🍎 Setting up launchctl daemon..."
   mkdir -p ~/Library/LaunchAgents
 
   cat > ~/Library/LaunchAgents/com.gbarczyszyn.mitosis.plist <<EOF
@@ -36,8 +40,6 @@ if [[ "$OS" == "Darwin" ]]; then
   <array>
     <string>$INSTALL_DIR/mitosis</string>
     <string>daemon</string>
-    <string>--config</string>
-    <string>$CONFIG_PATH</string>
   </array>
   <key>RunAtLoad</key>
   <true/>
@@ -50,12 +52,12 @@ EOF
   launchctl unload ~/Library/LaunchAgents/com.gbarczyszyn.mitosis.plist 2>/dev/null || true
   launchctl load ~/Library/LaunchAgents/com.gbarczyszyn.mitosis.plist
 
-  echo "✅ mitosis installed and running as a launchctl agent!"
 elif [[ "$OS" == "Linux" ]] && command -v systemctl >/dev/null 2>&1; then
-  echo "🐧 Detected Linux with systemd - setting up systemd user service..."
-
+  echo "🐧 Setting up systemd user service..."
   SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
   mkdir -p "$SYSTEMD_USER_DIR"
+
+  CONFIG_PATH="$HOME/.mitosis/$REPO_NAME/config.yaml"
 
   cat > "$SYSTEMD_USER_DIR/mitosis.service" <<EOF
 [Unit]
@@ -74,9 +76,10 @@ EOF
   systemctl --user enable mitosis.service
   systemctl --user start mitosis.service
 
-  echo "✅ mitosis installed and running as a systemd user service!"
 else
-  echo "⚠️  Unsupported OS or no service manager found. Binary installed, but daemon not enabled."
+  echo "⚠️  Unsupported OS or no service manager found. Daemon mode not enabled."
 fi
 
-echo "👉 Place your config.yaml at: $CONFIG_PATH"
+echo "✅ Mitosis installed and running!"
+echo "📂 Repo path: ~/.mitosis/$REPO_NAME"
+echo "📄 Config:    ~/.mitosis/$REPO_NAME/config.yaml"

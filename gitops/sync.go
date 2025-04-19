@@ -112,9 +112,15 @@ func SyncWithPaths(repoURL, repoPath string, paths []string) error {
 
 		dst := filepath.Join(repoPath, relPath)
 
+		if _, err := os.Stat(absSource); os.IsNotExist(err) {
+			fmt.Printf("⚠️  Skipping missing file: %s\n", absSource)
+			continue
+		}
+
 		if err := copyFile(absSource, dst); err != nil {
 			return fmt.Errorf("failed to copy %s to %s: %v", absSource, dst, err)
 		}
+
 	}
 
 	msg := fmt.Sprintf("mitosis: auto sync at %s", time.Now().Format(time.RFC822))
