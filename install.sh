@@ -2,8 +2,15 @@
 
 set -e
 
+REPO_URL="${REPO_URL:-}"
+
 if [ -z "$REPO_URL" ]; then
-  read -p "🌐 Enter your Git repository URL (e.g. git@github.com:user/mitosis-gitops.git): " REPO_URL
+  if [ -t 0 ]; then
+    read -p "🌐 Enter your Git repository URL (e.g. git@github.com:user/mitosis-gitops.git): " REPO_URL
+  else
+    echo "❌ REPO_URL not provided and terminal not interactive. Please run manually or set REPO_URL env."
+    exit 1
+  fi
 fi
 
 REPO_NAME=$(basename "$REPO_URL" .git)
@@ -21,7 +28,7 @@ echo "🚀 Installing to $INSTALL_DIR..."
 sudo mv $BINARY_NAME $INSTALL_DIR/
 
 echo "📁 Running mitosis init..."
-$INSTALL_DIR/mitosis init --repo "$REPO_URL"
+REPO_URL="$REPO_URL" $INSTALL_DIR/mitosis init --repo "$REPO_URL"
 
 OS=$(uname -s)
 
