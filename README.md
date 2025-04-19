@@ -46,10 +46,13 @@ After installing, everything is driven by your Git-based `config.yaml` stored in
 You can run:
 
 ```bash
-mitosis sync
-mitosis apply
-mitosis daemon
-mitosis doctor
+mitosis sync        # Copy system files into repo
+mitosis apply       # Apply repo files into system
+mitosis daemon      # Run in watch mode
+mitosis doctor      # Show resolved config
+mitosis start       # Start the background service
+mitosis stop        # Stop the background service
+mitosis status      # Check service status
 ```
 
 ## 🛠 Development
@@ -64,7 +67,7 @@ make sync
 To initialize a new repository:
 
 ```bash
-make init REPO=git@github.com:gBarczyszyn/mitosis-gitops.git
+make init REPO=git@github.com:youruser/mitosis-gitops.git
 ```
 
 ## 📦 Directory structure

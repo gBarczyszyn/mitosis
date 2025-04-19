@@ -27,66 +27,21 @@ go build -o $BINARY_NAME
 echo "🚀 Installing to $INSTALL_DIR..."
 sudo mv $BINARY_NAME $INSTALL_DIR/
 
+# Ensure $BINARY_NAME is in PATH
+if ! command -v $BINARY_NAME >/dev/null 2>&1; then
+  echo "⚠️  $BINARY_NAME not found in PATH. You may need to add $INSTALL_DIR to your PATH."
+else
+  echo "✅ $BINARY_NAME is now available at $(which $BINARY_NAME)"
+fi
+
 echo "📁 Running mitosis init..."
 REPO_URL="$REPO_URL" $INSTALL_DIR/mitosis init --repo "$REPO_URL"
 
-OS=$(uname -s)
-
-if [[ "$OS" == "Darwin" ]]; then
-  echo "🍎 Setting up launchctl daemon..."
-  mkdir -p ~/Library/LaunchAgents
-
-  cat > ~/Library/LaunchAgents/com.gbarczyszyn.mitosis.plist <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>com.gbarczyszyn.mitosis</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>$INSTALL_DIR/mitosis</string>
-    <string>daemon</string>
-  </array>
-  <key>RunAtLoad</key>
-  <true/>
-  <key>KeepAlive</key>
-  <true/>
-</dict>
-</plist>
-EOF
-
-  launchctl unload ~/Library/LaunchAgents/com.gbarczyszyn.mitosis.plist 2>/dev/null || true
-  launchctl load ~/Library/LaunchAgents/com.gbarczyszyn.mitosis.plist
-
-elif [[ "$OS" == "Linux" ]] && command -v systemctl >/dev/null 2>&1; then
-  echo "🐧 Setting up systemd user service..."
-  SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
-  mkdir -p "$SYSTEMD_USER_DIR"
-
-  CONFIG_PATH="$HOME/.mitosis/$REPO_NAME/config.yaml"
-
-  cat > "$SYSTEMD_USER_DIR/mitosis.service" <<EOF
-[Unit]
-Description=Mitosis Sync Daemon
-After=network.target
-
-[Service]
-ExecStart=$INSTALL_DIR/mitosis daemon --config $CONFIG_PATH
-Restart=always
-
-[Install]
-WantedBy=default.target
-EOF
-
-  systemctl --user daemon-reexec
-  systemctl --user enable mitosis.service
-  systemctl --user start mitosis.service
-
+echo ""
+read -p "🚀 Do you want to start the mitosis daemon now? (y/n): " RESP
+if [[ "$RESP" == "y" || "$RESP" == "Y" ]]; then
+  $INSTALL_DIR/mitosis start --config "$HOME/.mitosis/$REPO_NAME/config.yaml"
+  echo "✅ Daemon started."
 else
-  echo "⚠️  Unsupported OS or no service manager found. Daemon mode not enabled."
+  echo "ℹ️  You can start the daemon later with: mitosis start"
 fi
-
-echo "✅ Mitosis installed and running!"
-echo "📂 Repo path: ~/.mitosis/$REPO_NAME"
-echo "📄 Config:    ~/.mitosis/$REPO_NAME/config.yaml"
