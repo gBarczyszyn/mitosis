@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/seuuser/mitosis/cmd"
+	"github.com/gBarczyszyn/mitosis/cmd"
 )
 
 func main() {
