@@ -1,0 +1,25 @@
+# Build output
+mitosis
+
+# Binaries
+*.exe
+*.out
+*.o
+
+# IDEs / editors
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Configs & cache
+*.log
+.mitosis/
+
+# Ignore your own config file
+config.yaml
