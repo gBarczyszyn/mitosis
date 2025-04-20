@@ -2,44 +2,53 @@
 
 set -e
 
-BIN_NAME="mitosis"
-BIN_PATH="./$BIN_NAME"
+REPO_URL="${REPO_URL:-}"
+
+if [ -z "$REPO_URL" ]; then
+  if [ -t 0 ]; then
+    read -p "🌐 Enter your Git repository URL (e.g. git@github.com:user/mitosis-gitops.git): " REPO_URL
+  else
+    echo "❌ REPO_URL not provided and terminal not interactive. Please run manually or set REPO_URL env."
+    exit 1
+  fi
+fi
+
+REPO_NAME=$(basename "$REPO_URL" .git)
 INSTALL_DIR="/usr/local/bin"
-CONFIG_DIR="$HOME/.mitosis"
-REPO_FILE="$CONFIG_DIR/repo.yaml"
+BINARY_NAME="mitosis"
 
-echo "📦 Installing $BIN_NAME..."
+echo "📦 Installing mitosis..."
 
-# Validar se o binário existe
-if [ ! -f "$BIN_PATH" ]; then
-  echo "❌ Binary '$BIN_PATH' not found."
-  echo "👉 Run 'go build -o mitosis .' before running this script."
+# Check if binary exists
+if [ ! -f "./$BINARY_NAME" ]; then
+  echo "🔨 Building $BINARY_NAME..."
+  go build -o $BINARY_NAME .
+fi
+
+if [ ! -f "./$BINARY_NAME" ]; then
+  echo "❌ Binary './$BINARY_NAME' not found."
+  echo "👉 Run 'go build -o $BINARY_NAME .' before running this script."
   exit 1
 fi
 
-# Instalar binário
-sudo cp "$BIN_PATH" "$INSTALL_DIR/"
-sudo chmod +x "$INSTALL_DIR/$BIN_NAME"
-echo "✅ Installed $BIN_NAME to $INSTALL_DIR"
+echo "🚀 Installing to $INSTALL_DIR..."
+sudo mv $BINARY_NAME $INSTALL_DIR/
 
-# Criar pasta de config
-mkdir -p "$CONFIG_DIR"
-
-# Se o repo.yaml não existir, criar
-if [ ! -f "$REPO_FILE" ]; then
-  if [ -n "$REPO_URL" ]; then
-    echo "repo_url: $REPO_URL" > "$REPO_FILE"
-  else
-    read -rp "🔗 Enter the Git repository URL to sync with: " REPO_URL_INPUT
-    echo "repo_url: $REPO_URL_INPUT" > "$REPO_FILE"
-  fi
-  echo "✅ Repository URL saved to $REPO_FILE"
+# Ensure it's available in PATH
+if ! command -v $BINARY_NAME >/dev/null 2>&1; then
+  echo "⚠️  $BINARY_NAME not found in PATH. You may need to add $INSTALL_DIR to your PATH."
 else
-  echo "📁 Repo config already exists at $REPO_FILE, skipping..."
+  echo "✅ $BINARY_NAME is now available at $(which $BINARY_NAME)"
 fi
 
-# Perguntar se deseja iniciar o daemon
-read -rp "🚀 Do you want to start the mitosis daemon now? [y/N]: " START_DAEMON
-if [[ "$START_DAEMON" =~ ^[Yy]$ ]]; then
-    "$INSTALL_DIR/$BIN_NAME" start
+echo "📁 Running mitosis init..."
+REPO_URL="$REPO_URL" $INSTALL_DIR/mitosis init --repo "$REPO_URL"
+
+echo ""
+read -p "🚀 Do you want to start the mitosis daemon now? (y/n): " RESP
+if [[ "$RESP" == "y" || "$RESP" == "Y" ]]; then
+  $INSTALL_DIR/mitosis start --config "$HOME/.mitosis/$REPO_NAME/config.yaml"
+  echo "✅ Daemon started."
+else
+  echo "ℹ️  You can start the daemon later with: mitosis start"
 fi
