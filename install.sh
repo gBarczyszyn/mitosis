@@ -17,16 +17,17 @@ REPO_NAME=$(basename "$REPO_URL" .git)
 INSTALL_DIR="/usr/local/bin"
 BINARY_NAME="mitosis"
 
-echo "📥 Cloning mitosis source..."
-git clone https://github.com/gBarczyszyn/mitosis.git /tmp/mitosis-install
-cd /tmp/mitosis-install
+TMP_DIR=$(mktemp -d)
+echo "📥 Cloning mitosis source into $TMP_DIR..."
+git clone https://github.com/gBarczyszyn/mitosis.git "$TMP_DIR"
+cd "$TMP_DIR"
 
 echo "🔨 Building $BINARY_NAME..."
 go build -o $BINARY_NAME
 
 if [ ! -f "./$BINARY_NAME" ]; then
   echo "❌ Binary './$BINARY_NAME' not found."
-  echo "👉 Run 'go build -o $BINARY_NAME .' manually if needed."
+  echo "👉 Build failed, check Go installation or source errors."
   exit 1
 fi
 
