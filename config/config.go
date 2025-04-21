@@ -54,31 +54,12 @@ func LoadConfig(userProvided string) (*Config, error) {
 		configPath = userProvided
 	} else {
 		home, _ := os.UserHomeDir()
-		mitosisPath := filepath.Join(home, ".mitosis")
-
-		entries, err := os.ReadDir(mitosisPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan ~/.mitosis: %v", err)
-		}
-
-		for _, entry := range entries {
-			if entry.IsDir() {
-				testPath := filepath.Join(mitosisPath, entry.Name(), "config.yaml")
-				if _, err := os.Stat(testPath); err == nil {
-					configPath = testPath
-					break
-				}
-			}
-		}
-
-		if configPath == "" {
-			return nil, fmt.Errorf("no config.yaml found inside ~/.mitosis")
-		}
+		configPath = filepath.Join(home, ".mitosis", "config.yaml")
 	}
 
 	f, err := os.Open(configPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open config.yaml: %w", err)
 	}
 	defer f.Close()
 
@@ -90,10 +71,9 @@ func LoadConfig(userProvided string) (*Config, error) {
 
 	if cfg.RepoURL == "" {
 		fmt.Println("⚠️  No repo_url configured — sync will be skipped.")
-		return &cfg, nil
 	}
 
-	if cfg.RepoPath == "" {
+	if cfg.RepoPath == "" && cfg.RepoURL != "" {
 		repoName := extractRepoName(cfg.RepoURL)
 		homeDir, _ := os.UserHomeDir()
 		cfg.RepoPath = filepath.Join(homeDir, ".mitosis", repoName)
@@ -148,7 +128,7 @@ func extractRepoName(url string) string {
 	return parts[len(parts)-1]
 }
 
-func createDefaultConfig(path string) error {
+func CreateDefaultConfig(path string) error {
 	defaultCfg := Config{
 		AWS:    AWSConfig{},
 		SSH:    SSHConfig{Keys: []string{}},
