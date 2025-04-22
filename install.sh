@@ -18,9 +18,7 @@ echo "✅ Binary installed at $BIN_PATH"
 if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
   echo "⚠️ $INSTALL_DIR is not in your PATH."
 
-  SHELL_RC="${HOME}/.profile"
-  [ -n "$ZSH_VERSION" ] && SHELL_RC="${HOME}/.zshrc"
-  [ -n "$BASH_VERSION" ] && SHELL_RC="${HOME}/.bashrc"
+  SHELL_RC="${HOME}/.zshrc"
 
   echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> "$SHELL_RC"
   echo "➕ Added to $SHELL_RC"
