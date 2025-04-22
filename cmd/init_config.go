@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gBarczyszyn/mitosis/internal/config"
+	"github.com/gBarczyszyn/mitosis/config"
 	"github.com/spf13/cobra"
 )
 
